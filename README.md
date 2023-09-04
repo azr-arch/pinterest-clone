@@ -6,7 +6,7 @@ This project is currently under construction. It is being built using React, Tai
 
 ##Demo
 
-(Link)[https://pinterest-clone-azr-arch.vercel.app/]
+!(Link)[https://pinterest-clone-azr-arch.vercel.app/]
 
 ## Installation
 
