@@ -4,9 +4,9 @@
 
 This project is currently under construction. It is being built using React, Tailwind, and Firebase.
 
-##Demo
+## Demo
 
-!(Link)[https://pinterest-clone-azr-arch.vercel.app/]
+[here](https://pinterest-clone-azr-arch.vercel.app/)
 
 ## Installation
 
