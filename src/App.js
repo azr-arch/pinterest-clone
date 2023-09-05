@@ -6,9 +6,11 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
 } from "react-router-dom";
+
 import MasonryLayoutPage, {
   loader as masonryLayoutPageLoader,
 } from "./pages/MasonryLayoutPage";
+
 import Explore from "./pages/Explore";
 import Layout from "./components/Layout";
 import { requireAuth } from "./utils";
@@ -19,13 +21,17 @@ import LoginOrRegister, {
   action as loginOrRegisterAction,
   loader as loginOrRegisterLoader,
 } from "./pages/LoginOrRegister";
-import UserProfile from "./pages/UserProfile";
+
+import UserProfile, { loader as userProfileLoader } from "./pages/UserProfile";
 import CreatePost, {
   action as createPostAction,
+  loader as createPostLoader,
 } from "./components/CreatePost";
 
+import Error from "./pages/Error";
+
 const App = () => {
-  const user = localStorage.getItem("user") || false;
+  const isLoggedIn = localStorage.getItem("loggedIN") || false;
 
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -33,34 +39,39 @@ const App = () => {
         path="/"
         action={loginOrRegisterAction}
         loader={loginOrRegisterLoader}
-        element={user ? <Layout /> : <LoginOrRegister />}
-        // loader={async () => requireAuth()}
+        element={isLoggedIn ? <Layout /> : <LoginOrRegister />}
       >
         <Route
           //this is homepage, might change the name later
           index
-          element={<MasonryLayoutPage />}
           loader={masonryLayoutPageLoader}
+          element={<MasonryLayoutPage />}
+          errorElement={<Error />}
         />
         <Route
           path="/pins/:id"
-          element={<PinDetails />}
           loader={pinDetailsLoader}
+          element={<PinDetails />}
+          errorElement={<Error />}
         />
         <Route
           path="/explore"
+          loader={async ({ request }) => await requireAuth(request)}
           element={<Explore />}
-          loader={async () => requireAuth()}
+          errorElement={<Error />}
         />
         <Route
           path="/create"
           action={createPostAction}
+          loader={createPostLoader}
           element={<CreatePost />}
+          errorElement={<Error />}
         />
         <Route
           path="/profile/:userName"
+          loader={userProfileLoader}
           element={<UserProfile />}
-          loader={async () => requireAuth()}
+          errorElement={<Error />}
         />
       </Route>
     )

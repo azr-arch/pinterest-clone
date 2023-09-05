@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, redirect, useLoaderData, useNavigation } from "react-router-dom";
+import { Form, useLoaderData, useNavigation, redirect } from "react-router-dom";
 import LoginPageHeader from "../components/LoginPageHeader";
 import { handleLogin, handleRegistration } from "../services/firebase";
 import { doesUserExists } from "../services/firebase";
@@ -15,12 +15,10 @@ export async function action({ request }) {
   const fullname = formData.get("fullname");
   const username = formData.get("username");
 
-  console.log("action function");
+  const path = new URL(request.url).searchParams.get("redirectTo") || "/";
 
   //if user name is given then it means its registration form
-  console.log("handleRegistration function got clicked");
   if (username) {
-    console.log("inside action function on user name valida");
     const data = await handleRegistration({
       email,
       password,
@@ -28,11 +26,10 @@ export async function action({ request }) {
       fullname,
     });
 
-    console.log(data);
     if (data?.status === "ok") {
-      window.location.href = "/";
+      redirectHelper(path);
     } else {
-      errorRedirectHelper("/", data.message);
+      redirectHelper(path, data.message);
     }
     //else its a login form
   } else {
@@ -40,21 +37,20 @@ export async function action({ request }) {
       email,
       password,
     });
-    console.log(data);
     if (data?.status === "ok") {
-      window.location.href = "/";
+      redirectHelper(path);
     } else {
-      errorRedirectHelper("/", data.message);
+      redirectHelper(path, data.message);
     }
   }
 
-  function errorRedirectHelper(route, message = null) {
+  function redirectHelper(route, message = null) {
     if (message) {
       throw redirect(`${route}?message=${message}`);
     }
-    return redirect("/");
+    // if()
+    window.location.href = `${route}`;
   }
-  return null;
 }
 
 const LoginOrRegister = () => {

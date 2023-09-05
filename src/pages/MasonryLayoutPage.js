@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import Pin from "../components/Pin";
 import { fetchAllPosts } from "../services/firebase";
 import { Await, defer, useLoaderData } from "react-router-dom";
 import LoadingPage from "./LoadingPage";
 
 export async function loader() {
-  return defer({ posts: fetchAllPosts() });
+  return defer({
+    posts: fetchAllPosts(),
+  });
 }
 
 const MasonryLayoutPage = () => {

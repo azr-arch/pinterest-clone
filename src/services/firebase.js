@@ -1,6 +1,19 @@
-import { useRef } from "react";
 import { firebase } from "../lib/firebase";
 import "firebase/compat/storage";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+const auth = getAuth();
+
+export async function getCurrentUser() {
+  const user = await new Promise((resolve) =>
+    onAuthStateChanged(auth, resolve)
+  );
+  if (user) {
+    return await findUser(user.email);
+  } else {
+    throw new Error("user is not logged in");
+  }
+}
 
 async function findUser(email) {
   return firebase
@@ -51,17 +64,14 @@ export function doesUserExists(username) {
 }
 
 export async function handleLogin(creds) {
-  console.log(creds);
   try {
     await firebase
       .auth()
       .signInWithEmailAndPassword(creds.email, creds.password);
-    const data = await findUser(creds.email);
-    const { username, fullname, profilePic, post, userId } = data;
-    localStorage.setItem(
-      "user",
-      JSON.stringify({ username, fullname, profilePic, post, userId })
-    );
+    const { username } = await findUser(creds.email);
+
+    localStorage.setItem("loggedIN", true);
+    localStorage.setItem("username", username);
     return { status: "ok" };
   } catch (e) {
     if (e.code === "auth/user-not-found") {
@@ -92,13 +102,8 @@ export async function handleRegistration(creds) {
       post: 0,
     });
 
-    const user = {
-      userId: createdUser.user.uid,
-      username: creds.username.toLowerCase(),
-      fullname: creds.fullname,
-      profilePic: null,
-    };
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("loggedIN", true);
+    localStorage.setItem("username", creds.username.toLowerCase());
 
     return { status: "ok" };
   } catch (e) {
@@ -119,7 +124,8 @@ export async function handleRegistration(creds) {
 export async function logoutUser() {
   try {
     await firebase.auth().signOut();
-    localStorage.removeItem("user");
+    localStorage.removeItem("loggedIN");
+    localStorage.removeItem("username");
     window.location.href = "/";
   } catch (e) {
     console.log(e);
@@ -208,9 +214,9 @@ export async function fetchAllPosts() {
   return posts;
 }
 
-export async function fetchPostOfCurrentUser(userId) {
-  const postRef = firebase.firestore().collection("posts");
-}
+// export async function fetchPostOfCurrentUser(userId) {
+//   const postRef = firebase.firestore().collection("posts");
+// }
 
 export async function getPinById(pinId) {
   const pin = await firebase

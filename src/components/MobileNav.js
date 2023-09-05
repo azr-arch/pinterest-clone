@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { AiOutlineMenu, AiFillCloseSquare } from "react-icons/ai";
 import { NavLink } from "react-router-dom";
 
-const MobileNav = () => {
+const MobileNav = ({ username }) => {
   const [navStatus, setNavStatus] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
-  console.log(navStatus);
 
   const handleNavToggle = () => {
     setNavStatus((prev) => !prev);
@@ -47,7 +45,7 @@ const MobileNav = () => {
         </NavLink>
         <NavLink
           onClick={handleNavToggle}
-          to={`/profile/${user.username}`}
+          to={`/profile/${username}`}
           className="py-1 px-2 relative w-full rounded-md hoverEffect"
         >
           Account

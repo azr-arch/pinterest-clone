@@ -14,7 +14,8 @@ const Header = () => {
 
   const [isNotification, setIsNotification] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const user = JSON.parse(localStorage.getItem("user"));
+  const username = localStorage.getItem("username");
 
   return (
     <header className=" sticky top-0 z-50 bg-white h-20 flex items-center px-4 py-[1px] gap-4 font-semibold shadow-md mb-4">
@@ -26,7 +27,7 @@ const Header = () => {
         <p className="block text-xl md:hidden">Pointerest</p>
       </Link>
 
-      <MobileNav user={user} />
+      <MobileNav username={username} />
       <nav className="hidden md:flex items-center justify-between gap-0 md:gap-1 lg:gap-2 w-full">
         <NavLink
           to="/"
@@ -73,10 +74,10 @@ const Header = () => {
         <NavLink className=" py-1 px-2">
           <AiFillMessage size={"1.5rem"} />
         </NavLink>
-        <NavLink to={`/profile/${user.username}`}>
+        <NavLink to={`/profile/${username}`}>
           <img
             className="w-10 aspect-square rounded-[50%] p-2 object-cover hover:bg-gray-400"
-            src={user.profilePic ? user.profilePic : "/assets/noprofile.jpg"}
+            src={"/assets/noprofile.jpg"}
             alt="user-profile"
           />
         </NavLink>

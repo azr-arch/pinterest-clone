@@ -1,10 +1,13 @@
+import { getCurrentUser } from "./services/firebase";
 import { redirect } from "react-router-dom";
 
-export const requireAuth = () => {
-  // const isLoggedIn = localStorage.getItem("loggedIN") || false;
-  // console.log("auth triggered");
-  // if (!isLoggedIn) {
-  //   window.location.href("/");
-  // }
-  return null;
+export const requireAuth = async (request) => {
+  const path = new URL(request.url).pathname;
+
+  try {
+    await getCurrentUser();
+    return null;
+  } catch (e) {
+    throw redirect(`/?message=please log in first.&redirectTo=${path}`);
+  }
 };

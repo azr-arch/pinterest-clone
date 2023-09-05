@@ -3,8 +3,10 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 import { Await, Link, defer, useLoaderData } from "react-router-dom";
 import { getPinById, getUserById } from "../services/firebase";
 import LoadingPage from "./LoadingPage";
+import { requireAuth } from "../utils";
 
-export async function loader({ params }) {
+export async function loader({ params, request }) {
+  await requireAuth(request);
   const { id: pinId } = params;
 
   const pin = await getPinById(pinId);
@@ -15,6 +17,7 @@ export async function loader({ params }) {
 
 const PinDetails = () => {
   const loaderData = useLoaderData();
+
   function renderDetail({ pin, user }) {
     return (
       <div className="w-full h-full flex flex-col lg:flex-row gap-3 lg:gap-4  rounded-2xl p-2 justify-around shadow-2xl">
@@ -54,7 +57,11 @@ const PinDetails = () => {
 
   return (
     <div className="flex flex-col lg:flex-row lg:h-fitWFooter relative w-3/4 items-start mx-auto py-6 gap-4">
-      <Link to="../../" relative="path" className="absolute top-2 -left-12">
+      <Link
+        to="../../"
+        relative="path"
+        className="absolute top-2 -left-9 md:-left-12 lg:-left-20 lg:top-5 bg-gray-300 p-2 lg:p-4 shadow-2xl rounded-full"
+      >
         <AiOutlineArrowLeft color="black" size={17} />
       </Link>
 
