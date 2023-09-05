@@ -29,6 +29,7 @@ import CreatePost, {
 } from "./components/CreatePost";
 
 import Error from "./pages/Error";
+import PageNotFound from "./pages/PageNotFound";
 
 const App = () => {
   const isLoggedIn = localStorage.getItem("loggedIN") || false;
@@ -73,6 +74,8 @@ const App = () => {
           element={<UserProfile />}
           errorElement={<Error />}
         />
+
+        <Route path="/*" element={<PageNotFound />} />
       </Route>
     )
   );

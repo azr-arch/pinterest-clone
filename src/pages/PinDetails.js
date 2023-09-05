@@ -4,6 +4,8 @@ import { Await, Link, defer, useLoaderData } from "react-router-dom";
 import { getPinById, getUserById } from "../services/firebase";
 import LoadingPage from "./LoadingPage";
 import { requireAuth } from "../utils";
+import SaveButton from "../components/buttons/SaveButton";
+import LikeButton from "../components/buttons/LikeButton";
 
 export async function loader({ params, request }) {
   await requireAuth(request);
@@ -30,14 +32,11 @@ const PinDetails = () => {
         </div>
         {/* Made a container incase if wanna add more functionalities like download, report pin etc  */}
         <div className="flex flex-col items-start gap-4 px-8 py-4 lg:w-1/2 lg:py-3 lg:px-2">
-          <button
-            className=" rounded-3xl bg-black hover:opacity-100 text-white text-sm md:text-base font-bold px-4 py-1 hover:shadow-md"
-            onClick={(e) => {
-              console.log("saved got clicked");
-            }}
-          >
-            Save
-          </button>
+          <div className="flex items-center w-full justify-between">
+            <SaveButton postId={pin.postId} postUrl={pin.imageURL} />
+            <LikeButton postId={pin.postId} />
+          </div>
+
           <h2 className="text-base font-medium text-black mt-2 lg:text-2xl">
             {pin.title}
           </h2>

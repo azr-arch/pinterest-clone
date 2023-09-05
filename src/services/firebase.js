@@ -1,8 +1,27 @@
-import { firebase } from "../lib/firebase";
+import { firebase, db } from "../lib/firebase";
 import "firebase/compat/storage";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { arrayRemove, arrayUnion, updateDoc } from "firebase/firestore";
 
 const auth = getAuth();
+
+const getUserDocRef = async (userId) => {
+  const userDoc = await db
+    .collection("users")
+    .where("userId", "==", userId)
+    .get();
+
+  return userDoc.docs[0].ref;
+};
+
+const getPostDocRef = async (postId) => {
+  const postDoc = await db
+    .collection("post")
+    .where("postId", "==", postId)
+    .get();
+
+  return postDoc.docs[0].ref;
+};
 
 export async function getCurrentUser() {
   const user = await new Promise((resolve) =>
@@ -187,16 +206,9 @@ async function updatePostId(docRef) {
 }
 
 async function incrementPostCount(userId) {
-  const userRef = firebase
-    .firestore()
-    .collection("users")
-    .where("userId", "==", userId);
-  const querySnapshot = await userRef.get();
-
-  const documentSnapshot = querySnapshot.docs[0];
-  const userDocRef = documentSnapshot.ref;
+  const userDocRef = await getUserDocRef(userId);
   const { post } = (await userDocRef.get()).data();
-  // Update the document using userDocRefc
+  // Updating the document using userDocRefc
   await userDocRef.update({ post: post + 1 });
 }
 
@@ -238,9 +250,100 @@ export async function getUserById(userId) {
     .where("userId", "==", userId)
     .get()
     .then((snap) => {
-      console.log(snap);
       const data = snap.docs[0].data();
-      return { username: data.username, profilePic: data.profilePic };
+      return {
+        username: data.username,
+        profilePic: data.profilePic,
+        userId: data.userId,
+      };
     });
   return user;
+}
+
+export async function getCurrentUserId() {
+  return auth.currentUser.uid;
+}
+
+export async function savePost(postLink, postId) {
+  const userId = auth.currentUser.uid;
+  const isSaved = await checkIfSaved(postId);
+  const userDocRef = await getUserDocRef(userId);
+  const userDoc = await userDocRef.get();
+  const userData = userDoc.data();
+  const savedPosts = userData.savedPosts || [];
+
+  //unsave functionality
+  if (isSaved) {
+    const postToRemove = savedPosts.find((post) => post.id === postId);
+    await updateDoc(userDocRef, {
+      savedPosts: arrayRemove(postToRemove),
+    });
+  } else {
+    // save functionality
+    await updateDoc(userDocRef, {
+      savedPosts: arrayUnion({
+        url: postLink,
+        id: postId,
+      }),
+    });
+  }
+}
+
+export async function likePost(postId) {
+  // const userId = auth.currentUser.uid;
+  // const isLiked = await checkIfLiked(postId);
+  // const postDocRef = await getPostDocRef(postId);
+  // const postDoc = await postDocRef.get();
+  // const postData = postDoc.data();
+  // const likedBy = postData.likedBy || [];
+
+  // console.log(isLiked);
+  // if (isLiked[0]) {
+  //   const likeToRemove = likedBy.find((id) => id === userId);
+  //   await updateDoc(postDocRef, {
+  //     likedBy: arrayRemove(likeToRemove),
+  //   });
+  // } else {
+  //   await updateDoc(postDocRef, {
+  //     likedBy: arrayUnion(userId),
+  //   });
+  //   return likedBy.length + 1;
+  // }
+
+  const userId = auth.currentUser.uid;
+  const postDocRef = await getPostDocRef(postId);
+  const postDoc = await postDocRef.get();
+  const postData = postDoc.data();
+  const likedBy = postData.likedBy || [];
+  const isLiked = likedBy.includes(userId);
+
+  if (isLiked) {
+    await updateDoc(postDocRef, {
+      likedBy: arrayRemove(userId),
+    });
+  } else {
+    await updateDoc(postDocRef, {
+      likedBy: arrayUnion(userId),
+    });
+    return likedBy.length + 1;
+  }
+}
+
+export async function checkIfSaved(postId) {
+  const userId = auth.currentUser.uid;
+  const userDocRef = await getUserDocRef(userId);
+  const userDoc = await userDocRef.get();
+  const userData = userDoc.data();
+  const savedPosts = userData.savedPosts || [];
+
+  return savedPosts.some((post) => post.id === postId);
+}
+
+export async function checkIfLiked(postId) {
+  const userId = auth.currentUser.uid;
+  const postDocRef = await getPostDocRef(postId);
+  const postDoc = await postDocRef.get();
+  const postData = postDoc.data();
+  const likedBy = postData.likedBy || [];
+  return [likedBy.includes(userId), likedBy.length];
 }

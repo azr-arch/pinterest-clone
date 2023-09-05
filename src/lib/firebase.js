@@ -13,7 +13,7 @@ const config = {
 };
 
 const firebase = Firebase.initializeApp(config);
-const db = getFirestore(firebase);
+const db = firebase.firestore();
 
 const { FieldValue } = Firebase.firestore;
 
