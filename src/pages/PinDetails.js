@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-import { Await, Link, defer, useLoaderData } from "react-router-dom";
-import { getPinById, getUserById } from "../services/firebase";
+import { Await, Link, defer, useLoaderData, useParams } from "react-router-dom";
+import {
+  checkIfSaved,
+  getPinById,
+  getUserById,
+  savePost,
+} from "../services/firebase";
 import LoadingPage from "./LoadingPage";
 import { requireAuth } from "../utils";
 import SaveButton from "../components/buttons/SaveButton";
 import LikeButton from "../components/buttons/LikeButton";
+// import { AppContext } from "../context/context";
+// import { savePost } from "../services/firebase";
 
 export async function loader({ params, request }) {
   await requireAuth(request);
@@ -18,7 +25,27 @@ export async function loader({ params, request }) {
 }
 
 const PinDetails = () => {
+  const [isSaved, setIsSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const loaderData = useLoaderData();
+  const { id } = useParams();
+
+  useEffect(() => {
+    async function checkIfSavedHelper() {
+      const res = await checkIfSaved(id);
+      setIsSaved(res);
+    }
+
+    checkIfSavedHelper();
+  }, [id]);
+
+  const handleSaveClick = async (postUrl, postId) => {
+    setLoading(true);
+    const res = await savePost(postUrl, postId);
+    setIsSaved(res);
+    setLoading(false);
+  };
 
   function renderDetail({ pin, user }) {
     return (
@@ -33,7 +60,13 @@ const PinDetails = () => {
         {/* Made a container incase if wanna add more functionalities like download, report pin etc  */}
         <div className="flex flex-col items-start gap-4 px-8 py-4 lg:w-1/2 lg:py-3 lg:px-2">
           <div className="flex items-center w-full justify-between">
-            <SaveButton postId={pin.postId} postUrl={pin.imageURL} />
+            <SaveButton
+              postId={pin.postId}
+              postUrl={pin.imageURL}
+              isSaved={isSaved}
+              handleSaveClick={handleSaveClick}
+              loading={loading}
+            />
             <LikeButton postId={pin.postId} />
           </div>
 

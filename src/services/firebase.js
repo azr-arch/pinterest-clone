@@ -266,76 +266,106 @@ export async function getCurrentUserId() {
 
 export async function savePost(postLink, postId) {
   const userId = auth.currentUser.uid;
-  const isSaved = await checkIfSaved(postId);
-  const userDocRef = await getUserDocRef(userId);
-  const userDoc = await userDocRef.get();
-  const userData = userDoc.data();
-  const savedPosts = userData.savedPosts || [];
 
+  const userDocRef = await getUserDocRef(userId);
+  const postDocRef = await getPostDocRef(postId);
+
+  const [userDoc, postDoc] = await Promise.all([
+    userDocRef.get(),
+    postDocRef.get(),
+  ]);
+
+  const [userData, postData] = await Promise.all([
+    userDoc.data(),
+    postDoc.data(),
+  ]);
+
+  const savedPosts = userData.savedPosts || [];
+  const savedBy = postData.savedBy || [];
+
+  const isSaved = await checkIfSaved(postId);
   //unsave functionality
   if (isSaved) {
     const postToRemove = savedPosts.find((post) => post.id === postId);
-    await updateDoc(userDocRef, {
-      savedPosts: arrayRemove(postToRemove),
-    });
+
+    await Promise.all([
+      updateDoc(userDocRef, {
+        savedPosts: arrayRemove(postToRemove),
+      }),
+
+      updateDoc(postDocRef, {
+        savedBy: arrayRemove(userId),
+      }),
+    ]);
+
+    return false;
   } else {
     // save functionality
-    await updateDoc(userDocRef, {
-      savedPosts: arrayUnion({
-        url: postLink,
-        id: postId,
+    await Promise.all([
+      updateDoc(userDocRef, {
+        savedPosts: arrayUnion({
+          url: postLink,
+          id: postId,
+        }),
       }),
-    });
+      updateDoc(postDocRef, {
+        savedBy: arrayUnion(userId),
+      }),
+    ]);
+    return true;
   }
 }
 
 export async function likePost(postId) {
-  // const userId = auth.currentUser.uid;
-  // const isLiked = await checkIfLiked(postId);
-  // const postDocRef = await getPostDocRef(postId);
-  // const postDoc = await postDocRef.get();
-  // const postData = postDoc.data();
-  // const likedBy = postData.likedBy || [];
-
-  // console.log(isLiked);
-  // if (isLiked[0]) {
-  //   const likeToRemove = likedBy.find((id) => id === userId);
-  //   await updateDoc(postDocRef, {
-  //     likedBy: arrayRemove(likeToRemove),
-  //   });
-  // } else {
-  //   await updateDoc(postDocRef, {
-  //     likedBy: arrayUnion(userId),
-  //   });
-  //   return likedBy.length + 1;
-  // }
-
   const userId = auth.currentUser.uid;
+
+  const userDocRef = await getUserDocRef(userId);
   const postDocRef = await getPostDocRef(postId);
-  const postDoc = await postDocRef.get();
-  const postData = postDoc.data();
+
+  const [userDoc, postDoc] = await Promise.all([
+    userDocRef.get(),
+    postDocRef.get(),
+  ]);
+
+  const [userData, postData] = await Promise.all([
+    userDoc.data(),
+    postDoc.data(),
+  ]);
+
   const likedBy = postData.likedBy || [];
+  const likedPosts = userData.likedPosts || [];
   const isLiked = likedBy.includes(userId);
 
   if (isLiked) {
-    await updateDoc(postDocRef, {
-      likedBy: arrayRemove(userId),
-    });
+    await Promise.all([
+      updateDoc(postDocRef, {
+        likedBy: arrayRemove(userId),
+      }),
+      updateDoc(userDocRef, {
+        likedPosts: arrayRemove(postId),
+      }),
+    ]);
   } else {
-    await updateDoc(postDocRef, {
-      likedBy: arrayUnion(userId),
-    });
+    await Promise.all([
+      updateDoc(postDocRef, {
+        likedBy: arrayUnion(userId),
+      }),
+      updateDoc(userDocRef, {
+        likedPosts: arrayUnion(postId),
+      }),
+    ]);
     return likedBy.length + 1;
   }
 }
 
 export async function checkIfSaved(postId) {
+  console.log(postId);
   const userId = auth.currentUser.uid;
   const userDocRef = await getUserDocRef(userId);
   const userDoc = await userDocRef.get();
   const userData = userDoc.data();
   const savedPosts = userData.savedPosts || [];
-
+  console.log(savedPosts);
   return savedPosts.some((post) => post.id === postId);
 }
 
