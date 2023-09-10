@@ -1,8 +1,9 @@
 import React from "react";
 import { getCurrentUser, logoutUser } from "../services/firebase";
-import { Await, defer, useLoaderData } from "react-router-dom";
+import { Await, defer, useLoaderData, NavLink, Outlet } from "react-router-dom";
 import LoadingPage from "./LoadingPage";
 import { requireAuth } from "../utils";
+import SavedPosts from "../components/SavedPosts";
 
 export async function loader({ request }) {
   await requireAuth(request);
@@ -13,6 +14,12 @@ export async function loader({ request }) {
 
 const UserProfile = () => {
   const userPromise = useLoaderData();
+
+  const activeStyles = {
+    fontWeight: "bold",
+    color: "black",
+    borderBottom: "2px solid black",
+  };
 
   function renderDetails(user) {
     return (
@@ -30,12 +37,34 @@ const UserProfile = () => {
         >
           Logout
         </button>
+
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-2 my-4">
+            <NavLink
+              style={({ isActive }) => (isActive ? activeStyles : null)}
+              className="text-gray-700 font-normal px-4 py-2 "
+              to="."
+              end
+            >
+              Saved
+            </NavLink>
+            <NavLink
+              style={({ isActive }) => (isActive ? activeStyles : null)}
+              className="text-gray-700 font-normal px-4 py-2 "
+              to="posts"
+            >
+              Created
+            </NavLink>
+          </div>
+
+          <Outlet context={user.userId} />
+        </div>
       </>
     );
   }
 
   return (
-    <div className="h-fitWFooter flex flex-col items-center gap-2">
+    <div className="min-h-fitWFooter flex flex-col items-center gap-2">
       <React.Suspense fallback={<LoadingPage />}>
         <Await resolve={userPromise.user}>
           {(user) => renderDetails(user)}

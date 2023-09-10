@@ -226,9 +226,40 @@ export async function fetchAllPosts() {
   return posts;
 }
 
-// export async function fetchPostOfCurrentUser(userId) {
-//   const postRef = firebase.firestore().collection("posts");
-// }
+async function getUserIdByUsername(name) {
+  return await firebase
+    .firestore()
+    .collection("users")
+    .where("username", "==", name)
+    .get()
+    .then((snap) => {
+      return snap.docs[0].data().userId;
+    });
+}
+
+export async function fetchSavedPosts(userName) {
+  const userId = await getUserIdByUsername(userName);
+  const userDocRef = await getUserDocRef(userId);
+  const userDoc = await userDocRef.get();
+  const userData = userDoc.data();
+  const savedPosts = userData.savedPosts || [];
+
+  return savedPosts;
+}
+
+export async function fetchPostsOfUser(userName) {
+  const userId = await getUserIdByUsername(userName);
+  const posts = await firebase
+    .firestore()
+    .collection("post")
+    .where("postedBy", "==", userId)
+    .get()
+    .then((snap) => {
+      return snap.docs.map((doc) => doc.data());
+    });
+  console.log(posts);
+  return posts;
+}
 
 export async function getPinById(pinId) {
   const pin = await firebase
@@ -359,13 +390,11 @@ export async function likePost(postId) {
 }
 
 export async function checkIfSaved(postId) {
-  console.log(postId);
   const userId = auth.currentUser.uid;
   const userDocRef = await getUserDocRef(userId);
   const userDoc = await userDocRef.get();
   const userData = userDoc.data();
   const savedPosts = userData.savedPosts || [];
-  console.log(savedPosts);
   return savedPosts.some((post) => post.id === postId);
 }
 

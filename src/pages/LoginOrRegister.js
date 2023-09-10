@@ -45,11 +45,13 @@ export async function action({ request }) {
   }
 
   function redirectHelper(route, message = null) {
+    //if any error occurs
     if (message) {
       throw redirect(`${route}?message=${message}`);
     }
-    // if()
-    window.location.href = `${route}`;
+
+    //safe routing
+    window.location.href = route;
   }
 }
 
