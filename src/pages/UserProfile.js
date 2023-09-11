@@ -3,7 +3,6 @@ import { getCurrentUser, logoutUser } from "../services/firebase";
 import { Await, defer, useLoaderData, NavLink, Outlet } from "react-router-dom";
 import LoadingPage from "./LoadingPage";
 import { requireAuth } from "../utils";
-import EditProfile from "../components/EditProfile";
 import { AiFillEdit } from "react-icons/ai";
 import { updateUserProfile } from "../services/firebase";
 
