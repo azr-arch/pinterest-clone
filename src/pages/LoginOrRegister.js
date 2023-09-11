@@ -49,10 +49,10 @@ export async function action({ request }) {
     if (message) {
       throw redirect(`${route}?message=${message}`);
     }
-
     //safe routing
     window.location.href = route;
   }
+  return null;
 }
 
 const LoginOrRegister = () => {

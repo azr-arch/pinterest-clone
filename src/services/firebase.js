@@ -197,6 +197,24 @@ async function uploadFile(storageRef, file) {
   });
 }
 
+export async function updateUserProfile(file) {
+  const storageRef = firebase
+    .storage()
+    .refFromURL("gs://pointerest-4877f.appspot.com/" + file.name);
+  const userDocRef = await getUserDocRef(auth.currentUser.uid);
+  try {
+    await uploadFile(storageRef, file);
+    const downloadURL = await storageRef.getDownloadURL();
+
+    await updateDoc(userDocRef, {
+      profilePic: downloadURL,
+    });
+    console.log("uploaded profile successfully");
+  } catch (e) {
+    console.log("error updating profile please try again later! ", e.message);
+  }
+}
+
 async function addPostToFirestore(postData) {
   return firebase.firestore().collection("post").add(postData);
 }

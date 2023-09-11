@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom/";
 
 import { BiSolidNotification } from "react-icons/bi";
 import { AiFillMessage, AiOutlineMenu } from "react-icons/ai";
+import { getCurrentUser } from "../services/firebase";
 import MobileNav from "./MobileNav";
 
 const Header = () => {
+  const [userProfile, setUserProfile] = useState(null);
+  const [username, setUsername] = useState(null);
+
+  useEffect(() => {
+    const helper = async () => {
+      const userObj = await getCurrentUser();
+      setUserProfile(userObj.profilePic);
+      setUsername(userObj.username);
+    };
+
+    helper();
+  }, []);
+
   const activeStyles = {
     backgroundColor: "black",
     color: "white",
@@ -15,7 +29,6 @@ const Header = () => {
   const [isNotification, setIsNotification] = useState(false);
 
   // const user = JSON.parse(localStorage.getItem("user"));
-  const username = localStorage.getItem("username");
 
   return (
     <header className=" sticky top-0 z-50 bg-white h-20 flex items-center px-4 py-[1px] gap-4 font-semibold shadow-md mb-4">
@@ -76,8 +89,8 @@ const Header = () => {
         </NavLink>
         <NavLink to={`/profile/${username}`}>
           <img
-            className="w-10 aspect-square rounded-[50%] p-2 object-cover hover:bg-gray-400"
-            src={"/assets/noprofile.jpg"}
+            className="w-12 aspect-square rounded-[50%] p-2 object-cover hover:bg-gray-400"
+            src={userProfile ? userProfile : "/assets/noprofile.jpg"}
             alt="user-profile"
           />
         </NavLink>
