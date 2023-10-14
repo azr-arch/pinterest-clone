@@ -32,8 +32,8 @@ const UserProfile = () => {
     }
   };
 
-  const handleSave = (e) => {
-    updateUserProfile(file);
+  const handleSave = async (e) => {
+    await updateUserProfile(file);
 
     setFile(null);
     window.location.reload();
@@ -83,6 +83,9 @@ const UserProfile = () => {
 
         <p className="text-2xl text-black font-medium">{user.fullname}</p>
         <p className="text-md text-gray-500">@{user.username}</p>
+        <p className="text-sm font-medium text-gray-500 mb-2">
+          {user?.following} Following
+        </p>
         <div className="flex items-center gap-4">
           <button
             onClick={logoutUser}

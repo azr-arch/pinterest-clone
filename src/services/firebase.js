@@ -205,7 +205,7 @@ export async function updateUserProfile(file) {
   try {
     await uploadFile(storageRef, file);
     const downloadURL = await storageRef.getDownloadURL();
-
+    console.log(downloadURL);
     await updateDoc(userDocRef, {
       profilePic: downloadURL,
     });
