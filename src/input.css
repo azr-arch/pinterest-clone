@@ -74,3 +74,29 @@ img {
 .animate-shimmer {
   animation: shimmer 2s linear infinite;
 }
+
+div[data-value="skeleton"] {
+  background-color: #e2e5e7;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0)
+  );
+
+  background-size: 40px 100%;
+
+  background-position: left -40px top 0;
+
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease;
+  background-repeat: no-repeat;
+  animation-name: loading;
+}
+
+@keyframes loading {
+  100% {
+    background-position: right -40px top 0;
+  }
+}

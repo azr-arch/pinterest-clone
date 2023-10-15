@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { getCurrentUser, logoutUser } from "../services/firebase";
 import { Await, defer, useLoaderData, NavLink, Outlet } from "react-router-dom";
-import LoadingPage from "./LoadingPage";
 import { requireAuth } from "../utils";
 import { AiFillEdit } from "react-icons/ai";
 import { updateUserProfile } from "../services/firebase";
+
+import ProfileSkeleton from "../components/skeletonLoaders/ProfileSkeleton";
 
 export async function loader({ request }) {
   await requireAuth(request);
@@ -45,6 +46,7 @@ const UserProfile = () => {
     borderBottom: "2px solid black",
   };
 
+  // UI
   function renderDetails(user) {
     return (
       <>
@@ -147,7 +149,7 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-fitWFooter flex flex-col items-center gap-2 relative">
-      <React.Suspense fallback={<LoadingPage />}>
+      <React.Suspense fallback={<ProfileSkeleton />}>
         <Await resolve={userPromise.user}>
           {(user) => renderDetails(user)}
         </Await>
