@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, Link } from "react-router-dom/";
+import { NavLink, Link, Form } from "react-router-dom/";
 
 import { BiSolidNotification } from "react-icons/bi";
-import { AiFillMessage, AiOutlineMenu } from "react-icons/ai";
+import { AiFillMessage } from "react-icons/ai";
 import { getCurrentUser } from "../services/firebase";
 import MobileNav from "./MobileNav";
 
@@ -13,11 +13,18 @@ const Header = () => {
     useEffect(() => {
         const helper = async () => {
             const userObj = await getCurrentUser();
+            console.log(userObj);
             setUserProfile(userObj.profilePic);
             setUsername(userObj.username);
         };
-
-        helper();
+        try {
+            helper();
+        } catch (error) {
+            console.log(
+                "Something went wrong, Maybe your internet died!. ",
+                error.message
+            );
+        }
     }, []);
 
     const activeStyles = {
@@ -27,8 +34,6 @@ const Header = () => {
     };
 
     const [isNotification, setIsNotification] = useState(false);
-
-    // const user = JSON.parse(localStorage.getItem("user"));
 
     return (
         <header className=" sticky top-0 z-50 bg-white h-20 flex items-center px-4 py-[1px] gap-4 font-semibold shadow-md mb-4">
@@ -63,15 +68,22 @@ const Header = () => {
                 >
                     Create
                 </NavLink>
-                <div className="grow bg-[#dcdcdc] bg-opacity-40 rounded-[25px] flex items-center py-1 shadow-sm">
+
+                {/* Search functionality  --> TODO move it to its separate page  */}
+                <Form
+                    name="search-form"
+                    role="search"
+                    className="grow bg-[#dcdcdc] bg-opacity-40 rounded-[25px] flex items-center py-1 shadow-sm"
+                >
                     <input
-                        type="text"
+                        type="search"
                         name="search"
-                        id="search"
+                        aria-label="Search User or Posts"
                         placeholder="Search"
                         className=" grow outline-none border-none bg-transparent py-1 px-5 placeholder-black placeholder:opacity-70 focus:outline-black rounded-[25px]"
+                        // defaultValue={searchParam}
                     />
-                </div>
+                </Form>
 
                 <NavLink
                     onClick={() => setIsNotification((prev) => !prev)}
